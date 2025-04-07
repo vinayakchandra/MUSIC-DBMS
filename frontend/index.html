@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music DBMS 🎵</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #f8f9fa, #e3f2fd);
+            color: #333;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #ffffff;
+            border: none;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+        }
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        .btn-custom:hover {
+            background-color: #0056b3;
+        }
+        input, select {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        input::placeholder {
+            color: #888;
+        }
+        ul {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .list-group-item {
+            border: none;
+            background-color: transparent;
+            color: #333;
+        }
+    </style>
+    <script>
+        const API_URL = "http://localhost:8000";
+
+        async function fetchUsers() {
+            const response = await fetch(`${API_URL}/users/`);
+            const users = await response.json();
+            document.getElementById("usersList").innerHTML = users.map(user =>
+                    `<li class="list-group-item">ID: ${user.id} | ${user.username} - ${user.email}</li>`
+            ).join('');
+        }
+
+        async function createUser() {
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+
+            await fetch(`${API_URL}/users/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email })
+            });
+
+            fetchUsers();
+        }
+
+        async function fetchPlaylists() {
+            const response = await fetch(`${API_URL}/playlists/`);
+            const playlists = await response.json();
+            document.getElementById("playlistsList").innerHTML = playlists.map(p =>
+                    `<li class="list-group-item">ID: ${p.id} | ${p.title} (User ID: ${p.user_id})</li>`
+            ).join('');
+        }
+
+        async function createPlaylist() {
+            const title = document.getElementById("playlistTitle").value;
+            const user_id = document.getElementById("playlistUserId").value;
+
+            await fetch(`${API_URL}/playlists/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, user_id })
+            });
+
+            fetchPlaylists();
+        }
+
+        async function fetchSongs() {
+            const response = await fetch(`${API_URL}/songs/`);
+            const songs = await response.json();
+            document.getElementById("songsList").innerHTML = songs.map(s =>
+                    `<li class="list-group-item">ID: ${s.id} | ${s.title} - ${s.genre} (${s.duration} sec)</li>`
+            ).join('');
+        }
+
+        async function createSong() {
+            const title = document.getElementById("songTitle").value;
+            const genre = document.getElementById("songGenre").value;
+            const duration = document.getElementById("songDuration").value;
+
+            await fetch(`${API_URL}/songs/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, genre, duration })
+            });
+
+            fetchSongs();
+        }
+
+        async function fetchArtists() {
+            const response = await fetch(`${API_URL}/artists/`);
+            const artists = await response.json();
+            document.getElementById("artistsList").innerHTML = artists.map(a =>
+                    `<li class="list-group-item">ID: ${a.id} | ${a.name} - ${a.country}</li>`
+            ).join('');
+        }
+
+        async function createArtist() {
+            const name = document.getElementById("artistName").value;
+            const country = document.getElementById("artistCountry").value;
+
+            await fetch(`${API_URL}/artists/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, country })
+            });
+
+            fetchArtists();
+        }
+
+        async function addSongToPlaylist() {
+            const playlist_id = document.getElementById("psPlaylistId").value;
+            const song_id = document.getElementById("psSongId").value;
+
+            await fetch(`${API_URL}/playlist-songs/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ playlist_id, song_id })
+            });
+
+            alert("✅ Song added to playlist!");
+        }
+
+        async function addArtistToSong() {
+            const song_id = document.getElementById("saSongId").value;
+            const artist_id = document.getElementById("saArtistId").value;
+
+            await fetch(`${API_URL}/song-artists/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ song_id, artist_id })
+            });
+
+            alert("✅ Artist added to song!");
+        }
+
+        window.onload = () => {
+            fetchUsers();
+            fetchPlaylists();
+            fetchSongs();
+            fetchArtists();
+        };
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">🎶 Music DBMS 🎶</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card p-3 mb-3">
+                <h3>Create User</h3>
+                <input type="text" id="username" class="form-control mb-2" placeholder="Username">
+                <input type="email" id="email" class="form-control mb-2" placeholder="Email">
+                <button class="btn btn-custom" onclick="createUser()">Add User</button>
+            </div>
+            <h4>Users</h4>
+            <ul id="usersList" class="list-group"></ul>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-3 mb-3">
+                <h3>Create Playlist</h3>
+                <input type="text" id="playlistTitle" class="form-control mb-2" placeholder="Playlist Title">
+                <input type="number" id="playlistUserId" class="form-control mb-2" placeholder="User ID">
+                <button class="btn btn-custom" onclick="createPlaylist()">Add Playlist</button>
+            </div>
+            <h4>Playlists</h4>
+            <ul id="playlistsList" class="list-group"></ul>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card p-3 mb-3">
+                <h3>Create Song</h3>
+                <input type="text" id="songTitle" class="form-control mb-2" placeholder="Song Title">
+                <input type="text" id="songGenre" class="form-control mb-2" placeholder="Genre">
+                <input type="number" id="songDuration" class="form-control mb-2" placeholder="Duration (seconds)">
+                <button class="btn btn-custom" onclick="createSong()">Add Song</button>
+            </div>
+            <h4>Songs</h4>
+            <ul id="songsList" class="list-group"></ul>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-3 mb-3">
+                <h3>Create Artist</h3>
+                <input type="text" id="artistName" class="form-control mb-2" placeholder="Artist Name">
+                <input type="text" id="artistCountry" class="form-control mb-2" placeholder="Country">
+                <button class="btn btn-custom" onclick="createArtist()">Add Artist</button>
+            </div>
+            <h4>Artists</h4>
+            <ul id="artistsList" class="list-group"></ul>
+        </div>
+    </div>
+
+    <!-- Additional Relationships -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card p-3 mb-3">
+                <h3>Add Song to Playlist</h3>
+                <input type="number" id="psPlaylistId" class="form-control mb-2" placeholder="Playlist ID">
+                <input type="number" id="psSongId" class="form-control mb-2" placeholder="Song ID">
+                <button class="btn btn-custom" onclick="addSongToPlaylist()">Add Song to Playlist</button>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-3 mb-3">
+                <h3>Add Artist to Song</h3>
+                <input type="number" id="saSongId" class="form-control mb-2" placeholder="Song ID">
+                <input type="number" id="saArtistId" class="form-control mb-2" placeholder="Artist ID">
+                <button class="btn btn-custom" onclick="addArtistToSong()">Add Artist to Song</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
